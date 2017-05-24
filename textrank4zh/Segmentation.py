@@ -37,7 +37,7 @@ class WordSegmentation(object):
         for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
             self.stop_words.add(word.strip())
     
-    def segment(self, text, lower = True, use_stop_words = True, use_speech_tags_filter = False):
+    def segment(self, text, lower = True, use_stop_words = True, use_speech_tags_filter = False, word_dict = None):
         """对一段文本进行分词，返回list类型的分词结果
 
         Keyword arguments:
@@ -62,10 +62,13 @@ class WordSegmentation(object):
 
         if use_stop_words:
             word_list = [word.strip() for word in word_list if word.strip() not in self.stop_words]
-
+        
+        if word_dict is not None:
+            word_list = [word_dict[word] if word in word_dict else word for word in word_list]
+        
         return word_list
         
-    def segment_sentences(self, sentences, lower=True, use_stop_words=True, use_speech_tags_filter=False):
+    def segment_sentences(self, sentences, lower=True, use_stop_words=True, use_speech_tags_filter=False, word_dict = None):
         """将列表sequences中的每个元素/句子转换为由单词构成的列表。
         
         sequences -- 列表，每个元素是一个句子（字符串类型）
@@ -76,7 +79,8 @@ class WordSegmentation(object):
             res.append(self.segment(text=sentence, 
                                     lower=lower, 
                                     use_stop_words=use_stop_words, 
-                                    use_speech_tags_filter=use_speech_tags_filter))
+                                    use_speech_tags_filter=use_speech_tags_filter,
+                                    word_dict = word_dict))
         return res
         
 class SentenceSegmentation(object):
@@ -115,22 +119,25 @@ class Segmentation(object):
         self.ws = WordSegmentation(stop_words_file=stop_words_file, allow_speech_tags=allow_speech_tags)
         self.ss = SentenceSegmentation(delimiters=delimiters)
         
-    def segment(self, text, lower = False):
+    def segment(self, text, lower = False, word_dict=None):
         text = util.as_text(text)
         sentences = self.ss.segment(text)
         words_no_filter = self.ws.segment_sentences(sentences=sentences, 
                                                     lower = lower, 
                                                     use_stop_words = False,
-                                                    use_speech_tags_filter = False)
+                                                    use_speech_tags_filter = False,
+                                                    word_dict = word_dict)
         words_no_stop_words = self.ws.segment_sentences(sentences=sentences, 
-                                                    lower = lower, 
-                                                    use_stop_words = True,
-                                                    use_speech_tags_filter = False)
+                                                        lower = lower, 
+                                                        use_stop_words = True,
+                                                        use_speech_tags_filter = False,
+                                                        word_dict = word_dict)
 
         words_all_filters = self.ws.segment_sentences(sentences=sentences, 
-                                                    lower = lower, 
-                                                    use_stop_words = True,
-                                                    use_speech_tags_filter = True)
+                                                      lower = lower, 
+                                                      use_stop_words = True,
+                                                      use_speech_tags_filter = True,
+                                                      word_dict = word_dict)
 
         return util.AttrDict(
                     sentences           = sentences, 

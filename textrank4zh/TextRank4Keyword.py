@@ -45,7 +45,8 @@ class TextRank4Keyword(object):
                 lower = False,
                 vertex_source = 'all_filters',
                 edge_source = 'no_stop_words',
-                pagerank_config = {'alpha': 0.85,}):
+                pagerank_config = {'alpha': 0.85,},
+                word_dict = None):
         """分析文本
 
         Keyword arguments:
@@ -55,7 +56,8 @@ class TextRank4Keyword(object):
         vertex_source   --  选择使用words_no_filter, words_no_stop_words, words_all_filters中的哪一个来构造pagerank对应的图中的节点。
                             默认值为`'all_filters'`，可选值为`'no_filter', 'no_stop_words', 'all_filters'`。关键词也来自`vertex_source`。
         edge_source     --  选择使用words_no_filter, words_no_stop_words, words_all_filters中的哪一个来构造pagerank对应的图中的节点之间的边。
-                            默认值为`'no_stop_words'`，可选值为`'no_filter', 'no_stop_words', 'all_filters'`。边的构造要结合`window`参数。
+                            默认值为`'no_stop_words'`，可选值为`'no_filter', 'no_stop_words', 'all_filters'`。边的构造要结合`window`参数。   
+        word_dict   --   可添加同义词词典
         """
         
         # self.text = util.as_text(text)
@@ -65,7 +67,7 @@ class TextRank4Keyword(object):
         self.keywords = []
         self.graph = None
         
-        result = self.seg.segment(text=text, lower=lower)
+        result = self.seg.segment(text=text, lower=lower, word_dict=word_dict)
         self.sentences = result.sentences
         self.words_no_filter = result.words_no_filter
         self.words_no_stop_words = result.words_no_stop_words
